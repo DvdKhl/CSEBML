@@ -91,6 +91,11 @@ namespace CSEBML.DataSource {
 			source.Write(valueBin, 0, vIntLength);
 		}
 
+		private byte[] zeroArray = new byte[8];
+		public void WriteFakeVInt(int vIntLength) { source.Write(zeroArray, 0, vIntLength); }
+
 		public void Write(byte[] b, int offset, int length) { source.Write(b, offset, length); }
+
+
 	}
 }

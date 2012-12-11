@@ -161,7 +161,11 @@ namespace CSEBML.DataSource {
 
 		public void WriteIdentifier(int id) { throw new NotSupportedException(); }
 		public void WriteVInt(long value, int vIntLength) { throw new NotSupportedException(); }
+		public void WriteFakeVInt(int vIntLength) { throw new NotSupportedException(); }
+
 		public void Write(byte[] b, int offset, int length) { throw new NotSupportedException(); }
+
+
 
 		public void Dispose() { blocks.Dispose(); }
 	}

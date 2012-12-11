@@ -16,6 +16,7 @@ namespace CSEBML.DataSource {
 
 		void WriteIdentifier(Int32 id);
 		void WriteVInt(Int64 value, Int32 vIntLength = 1);
+		void WriteFakeVInt(Int32 vIntLength);
 
 		void Write(Byte[] b, Int32 offset, Int32 length);
     }
