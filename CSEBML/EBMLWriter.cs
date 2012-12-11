@@ -19,21 +19,37 @@ namespace CSEBML {
 		}
 
 		public void WriteEBMLHeader(string docType, ulong docTypeVersion, ulong docTypeReadVersion) {
-			WriteMasterElement(EBMLDocType.EBMLHeader);
-			WriteElement(EBMLDocType.EBMLVersion, 1UL);
-			WriteElement(EBMLDocType.EBMLReadVersion, 1UL);
-			WriteElement(EBMLDocType.EBMLMaxIDLength, 4UL);
-			WriteElement(EBMLDocType.EBMLMaxSizeLength, 8UL);
+			using(WriteMasterElement(EBMLDocType.EBMLHeader)) {
+				WriteElement(EBMLDocType.EBMLVersion, 1UL);
+				WriteElement(EBMLDocType.EBMLReadVersion, 1UL);
+				WriteElement(EBMLDocType.EBMLMaxIDLength, 4UL);
+				WriteElement(EBMLDocType.EBMLMaxSizeLength, 8UL);
 
-			WriteElement(EBMLDocType.DocType, docType);
-			WriteElement(EBMLDocType.DocTypeVersion, docTypeVersion);
-			WriteElement(EBMLDocType.DocTypeReadVersion, docTypeReadVersion);
-			WriteEndMasterElement();
+				WriteElement(EBMLDocType.DocType, docType);
+				WriteElement(EBMLDocType.DocTypeVersion, docTypeVersion);
+				WriteElement(EBMLDocType.DocTypeReadVersion, docTypeReadVersion);
+			}
 		}
+
 
 		public ElementInfo WriteElement(EBMLDocElement elem, Object value) {
 			var binElem = ebmlDoc.TransformDocElement(elem, value);
 			return WriteElement(elem, binElem, 0, binElem.Length);
+		}
+		public ElementInfo WriteElement(EBMLDocElement elem, Stream data) {
+			Int64 idPos = dataSrc.Position;
+			dataSrc.WriteIdentifier(elem.Id);
+
+			Int64 vIntPos = dataSrc.Position;
+			dataSrc.WriteFakeVInt(8);
+			Int64 dataPos = dataSrc.Position;
+			var bytesWritten = dataSrc.Write(data);
+
+			var elemInfo = new ElementInfo(elem, idPos, vIntPos, dataPos);
+
+			UpdateElementLength(elemInfo);
+
+			return elemInfo;
 		}
 
 		public ElementInfo WriteElement(EBMLDocElement elem, byte[] b, int offset, int length) {
@@ -65,11 +81,11 @@ namespace CSEBML {
 		private void UpdateElementLength(ElementInfo elemInfo) {
 			var currentPos = dataSrc.Position;
 
-			var dataLength = dataSrc.Position - elemInfo.DataPos;
+			var dataLength = currentPos - elemInfo.DataPos;
 			elemInfo.DataLength = dataLength;
 
-			dataSrc.WriteVInt(dataLength, 8);
 			dataSrc.Position = elemInfo.VIntPos;
+			dataSrc.WriteVInt(dataLength, 8);
 
 			dataSrc.Position = currentPos;
 		}
