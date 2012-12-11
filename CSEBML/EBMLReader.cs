@@ -96,24 +96,5 @@ namespace CSEBML {
 			ElementInfo elem = index == parentElements.Count ? currentElement : parentElements[index];
 			return elem != null && elem.DataLength.HasValue ? elem.IdPos + elem.DataLength.Value : GetEndOfElement(index - 1);
 		}
-
-		public class Context {
-			private EBMLReader reader;
-			private List<ElementInfo> parentElements;
-
-			public ElementInfo CurrentElement { get; private set; }
-			public Int64 Position { get; private set; }
-			public ReadOnlyCollection<ElementInfo> ParentElements { get { return parentElements.AsReadOnly(); } }
-
-
-			public Context(EBMLReader reader, ElementInfo currentElement) {
-				parentElements = new List<ElementInfo>(reader.ParentElements);
-				Position = reader.BaseStream.Position;
-				CurrentElement = currentElement;
-				this.reader = reader;
-			}
-
-			public Boolean IsContextOf(EBMLReader reader) { return this.reader == reader; }
-		}
 	}
 }
