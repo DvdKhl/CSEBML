@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace CSEBML {
 	public class ElementInfo {
-		public readonly EBMLDocElement DocElement;
-		public readonly Int64 IdPos;
-		public readonly Int64 VIntPos;
-		public readonly Int64 DataPos;
-		public readonly Int64? DataLength;
+		public EBMLDocElement DocElement { get; private set; }
+		public Int64 IdPos { get; private set; }
+		public Int64 VIntPos { get; private set; }
+		public Int64 DataPos { get; private set; }
+		public Int64? DataLength { get; internal set; }
 
 		public override string ToString() { return DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : ""; }
 		public string ToDetailedString() { return (DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : "") + " IdPos:" + IdPos + " VIntPos:" + VIntPos + " DataPos:" + DataPos + " Datalength:" + DataLength; }
@@ -26,6 +26,15 @@ namespace CSEBML {
 			: this(docElement, idPos, vintPos, dataPos) {
 			DataLength = dataLength;
 		}
+	}
+	public class MasterElementInfo : ElementInfo, IDisposable {
+		public event EventHandler Disposed = delegate { };
+
+		public void Dispose() { Disposed(this, EventArgs.Empty); }
+
+		public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos, Int64 dataLength) : base(docElement, idPos, vintPos, dataPos, dataLength) { }
+		public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos) : base(docElement, idPos, vintPos, dataPos) { }
+
 	}
 
 }
