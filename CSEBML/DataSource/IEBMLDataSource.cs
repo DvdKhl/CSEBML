@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace CSEBML.DataSource {
     public interface IEBMLDataSource {
@@ -19,5 +20,6 @@ namespace CSEBML.DataSource {
 		void WriteFakeVInt(Int32 vIntLength);
 
 		void Write(Byte[] b, Int32 offset, Int32 length);
-    }
+		Int64 Write(Stream source);
+	}
 }

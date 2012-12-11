@@ -95,6 +95,7 @@ namespace CSEBML.DataSource {
 		public void WriteFakeVInt(int vIntLength) { source.Write(zeroArray, 0, vIntLength); }
 
 		public void Write(byte[] b, int offset, int length) { source.Write(b, offset, length); }
+		public long Write(System.IO.Stream source) { throw new NotImplementedException(); }
 
 
 	}
