@@ -7,6 +7,6 @@ namespace CSEBML.DocTypes {
 
 		Byte[] TransformDocElement(EBMLDocElement elem, Object value);
 
-		int MaxDocTypeReadVersion { get; }
+		Int32 MaxDocTypeReadVersion { get; }
     }
 }

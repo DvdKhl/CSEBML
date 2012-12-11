@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
-using CSEBML.DocTypes.EBML;
+﻿using CSEBML.DocTypes.EBML;
+using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace CSEBML.DocTypes.EBML {
