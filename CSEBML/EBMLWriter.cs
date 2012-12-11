@@ -1,12 +1,12 @@
-﻿using CSEBML.DocTypes.EBML;
-using System;
-using System.Linq;
-using System.IO;
+﻿using CSEBML.DataSource;
 using CSEBML.DocTypes;
-using CSEBML.DataSource;
+using CSEBML.DocTypes.EBML;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace CSEBML {
 	public class EBMLWriter {
