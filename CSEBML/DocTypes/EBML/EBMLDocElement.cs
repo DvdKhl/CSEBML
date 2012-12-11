@@ -2,9 +2,9 @@
 
 namespace CSEBML.DocTypes.EBML {
 	public class EBMLDocElement {
-		public readonly String Name;
-		public readonly EBMLElementType Type;
-		public readonly Int32 Id;
+		public String Name { get; private set; }
+		public EBMLElementType Type { get; private set; }
+		public Int32 Id { get; private set; }
 
 		public EBMLDocElement(Int32 id, EBMLElementType type, String name) {
 			Name = name;

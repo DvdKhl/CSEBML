@@ -75,7 +75,6 @@
     <Compile Include="DocTypes\Matroska\MatroskaDocMetaElement.cs" />
     <Compile Include="DocTypes\MCChronicles\MCChroniclesDocType.cs" />
     <Compile Include="ElementInfo.cs" />
-    <Compile Include="System.Collections.ObjectModel\DynKeyedCollection.cs" />
     <Compile Include="DataSource\EBMLBlockDataSource.cs" />
     <Compile Include="CSEBMLException.cs" />
     <Compile Include="EBMLReader.cs" />
