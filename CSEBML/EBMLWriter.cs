@@ -46,7 +46,7 @@ namespace CSEBML {
 			Int64 dataPos = dataSrc.Position;
 			dataSrc.Write(binElem, 0, binElem.Length);
 
-			var elemInfo = new ElementInfo { DocElement = elem, IdPos = idPos, VIntPos = vIntPos, DataPos = dataPos };
+			var elemInfo = new ElementInfo(elem, idPos, vIntPos, dataPos);
 
 			//Debug.WriteLine("WriteElement: " + elemInfo.ToDetailedString() + " DataSrcPos: " + dataSrc.Position);
 			return elemInfo;
@@ -62,7 +62,7 @@ namespace CSEBML {
 			Int64 dataPos = dataSrc.Position;
 			dataSrc.Write(b, offset, length);
 
-			var elemInfo = new ElementInfo { DocElement = elem, IdPos = idPos, VIntPos = vIntPos, DataPos = dataPos };
+			var elemInfo = new ElementInfo(elem, idPos, vIntPos, dataPos);
 			//Debug.WriteLine("WriteBinaryElement: " + elemInfo.ToDetailedString() + " DataSrcPos: " + dataSrc.Position);
 
 			return elemInfo;
@@ -75,7 +75,7 @@ namespace CSEBML {
 			Int64 vIntPos = dataSrc.Position;
 			dataSrc.WriteVInt(0, 8);
 
-			var elemInfo = new ElementInfo { DocElement = elem, IdPos = idPos, VIntPos = vIntPos, DataPos = dataSrc.Position };
+			var elemInfo = new ElementInfo(elem, idPos, vIntPos, dataSrc.Position);
 			parentElements.Push(elemInfo);
 
 			//Debug.WriteLine("WriteStartMasterElement: " + elemInfo.ToDetailedString() + " DataSrcPos: " + dataSrc.Position);
@@ -119,15 +119,15 @@ namespace CSEBML {
 		}
 		public void SetReaderContext(EBMLReader.Context context) { Context = new ContextObj(this, context); }
 
-		public class ElementInfo {
-			public EBMLDocElement DocElement;
-			public Int64 IdPos;
-			public Int64 VIntPos;
-			public Int64 DataPos;
-
-			public override string ToString() { return DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : ""; }
-			public string ToDetailedString() { return (DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : "") + " IdPos:" + IdPos + " VIntPos:" + VIntPos + " DataPos:" + DataPos; }
-		}
+		//public class ElementInfo {
+		//	public EBMLDocElement DocElement;
+		//	public Int64 IdPos;
+		//	public Int64 VIntPos;
+		//	public Int64 DataPos;
+		//
+		//	public override string ToString() { return DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : ""; }
+		//	public string ToDetailedString() { return (DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : "") + " IdPos:" + IdPos + " VIntPos:" + VIntPos + " DataPos:" + DataPos; }
+		//}
 
 
 		public class ContextObj {
@@ -151,12 +151,12 @@ namespace CSEBML {
 					return length;
 				};
 
-				parentElements = context.ParentElements.Select(ldElem => new ElementInfo {
-					IdPos = ldElem.ElementPosition,
-					VIntPos = ldElem.ElementPosition + idLength(ldElem.DocElement.Id),
-					DataPos = ldElem.DataPosition,
-					DocElement = ldElem.DocElement,
-				}).ToList();
+				parentElements = context.ParentElements.Select(ldElem => new ElementInfo(
+					ldElem.DocElement,
+					ldElem.IdPos,
+					ldElem.IdPos + idLength(ldElem.DocElement.Id),
+					ldElem.DataPos
+				)).ToList();
 				Position = context.Position;
 				this.writer = writer;
 			}

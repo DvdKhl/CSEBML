@@ -30,50 +30,50 @@ namespace CSEBML {
 		public ReadOnlyCollection<ElementInfo> ParentElements { get { return parentElements.AsReadOnly(); } }
 
 		public Object RetrieveValue() {
-			if(currentElement != null && currentElement.Length.HasValue && currentElement.ElementPosition == dataSrc.Position) {
+			if(currentElement != null && currentElement.DataLength.HasValue && currentElement.IdPos == dataSrc.Position) {
 				Int64 offset;
-				Byte[] valueData = dataSrc.GetData(currentElement.Length.Value, out offset);
-				return ebmlDoc.RetrieveValue(currentElement.DocElement, valueData, offset, currentElement.Length.Value);
+				Byte[] valueData = dataSrc.GetData(currentElement.DataLength.Value, out offset);
+				return ebmlDoc.RetrieveValue(currentElement.DocElement, valueData, offset, currentElement.DataLength.Value);
 
-			} else throw new Exception("Cannot read value. Invalid State");
+			} else throw new InvalidOperationException("Cannot read value: Invalid State");
 		}
 
 		public void JumpTo(Int64 position) {
 			while(true) {
-				if(parentElements[parentElements.Count - 1].ElementPosition < position && GetEndOfElement(parentElements.Count) > position) break;
+				if(parentElements[parentElements.Count - 1].IdPos < position && GetEndOfElement(parentElements.Count) > position) break;
 				LeaveMasterElement();
 			}
 			dataSrc.Position = position;
 		}
 
 		public ElementInfo NextElementInfo() {
-			Int64 oldPosition = dataSrc.Position;
+			Int64 idPos = dataSrc.Position;
 
 			if(currentElement != null) {
-				oldPosition = GetEndOfElement(parentElements.Count); //dataSrc.Position;
-				if(oldPosition != dataSrc.Position) dataSrc.Position = oldPosition;
+				idPos = GetEndOfElement(parentElements.Count); //dataSrc.Position;
+				if(idPos != dataSrc.Position) dataSrc.Position = idPos;
 			}
 
-			if(GetEndOfElement(parentElements.Count - 1) == oldPosition || dataSrc.EOF) return null;
+			if(GetEndOfElement(parentElements.Count - 1) == idPos || dataSrc.EOF) return null;
 
 
 			Int32 docElementId = dataSrc.ReadIdentifier();
-			Int64 length = dataSrc.ReadVInt();
+			Int64 vintPos = dataSrc.Position;
+			Int64 dataLength = dataSrc.ReadVInt();
 
-			if(docElementId < 0 || length < 0) {
+			if(docElementId < 0 || dataLength < 0) {
 				throw new InvalidOperationException("File most likely Corrupted");
-				//Crap just happened
-				//TODO Magic code to fix it goes here
+				//TODO Magic code to resync it goes here
 			}
 
-			return currentElement = new ElementInfo(ebmlDoc.RetrieveDocElement(docElementId), oldPosition, dataSrc.Position, length);
+			return currentElement = new ElementInfo(ebmlDoc.RetrieveDocElement(docElementId), idPos, vintPos, dataSrc.Position, dataLength);
 		}
 
 		public void EnterMasterElement() {
 			if(currentElement != null && currentElement.DocElement.Type == EBMLElementType.Master) {
 				parentElements.Add(currentElement);
 				currentElement = null;
-			} else throw new Exception("Cannot enter non Master Element");
+			} else throw new InvalidOperationException("Cannot enter non Master Element");
 		}
 
 		public void LeaveMasterElement() { LeaveMasterElements(-1); }
@@ -81,40 +81,22 @@ namespace CSEBML {
 			if(parentElements.Count != 0) {
 				if(toLevel < 0 & -toLevel <= parentElements.Count) {
 					toLevel = parentElements.Count + toLevel;
-				} else throw new Exception("Invalid Level");
+				} else throw new InvalidOperationException("Invalid Level");
 
 				//dataSrc.Position = GetEndOfElement(toLevel);
 				parentElements.RemoveRange(toLevel, parentElements.Count - toLevel);
 				currentElement = null;
 
-			} else throw new Exception("No Master Elements to leave");
+			} else throw new InvalidOperationException("No Master Elements to leave");
 		}
 
 		private Int64 GetEndOfElement(Int32 index) {
 			if(index < 0) return lengthKnown ? dataSrc.Length : -1;
 
 			ElementInfo elem = index == parentElements.Count ? currentElement : parentElements[index];
-			return elem != null && elem.Length.HasValue ? elem.ElementPosition + elem.Length.Value : GetEndOfElement(index - 1);
+			return elem != null && elem.DataLength.HasValue ? elem.IdPos + elem.DataLength.Value : GetEndOfElement(index - 1);
 		}
 
-		public class ElementInfo {
-			private EBMLDocElement docElement;
-			private Int64 position;
-			private Int64? length;
-
-			public EBMLDocElement DocElement { get { return docElement; } }
-			public Int64 ElementPosition { get { return position; } }
-			public Int64 DataPosition { get { return position; } }
-			public Int64? Length { get { return length; } }
-
-			public override string ToString() { return docElement != null ? docElement.Name.ToString() + "(" + Convert.ToString(docElement.Id, 16) + ")" : ""; }
-
-			internal ElementInfo(EBMLDocElement docElement, Int64 elementPosition, Int64 dataPosition, Int64? length) {
-				this.docElement = docElement;
-				this.position = dataPosition;
-				this.length = length;
-			}
-		}
 		public class Context {
 			private EBMLReader reader;
 			private List<ElementInfo> parentElements;
