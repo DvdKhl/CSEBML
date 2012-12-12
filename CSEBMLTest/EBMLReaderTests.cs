@@ -5,21 +5,34 @@ using CSEBML.DataSource;
 using CSEBML.DocTypes.Matroska;
 using CSEBML;
 using CSEBML.DocTypes.EBML;
+using System.Text;
 
 namespace CSEBMLTest {
 	[TestClass]
 	public class EBMLReaderTests {
 		[TestMethod]
 		public void ParseMatroskaTestSuite() {
+
 			var matroskaTestSuitePath = Path.Combine("TestFiles", "MatroskaTestSuite");
 
 			if(!Directory.Exists(matroskaTestSuitePath)) {
 				Assert.Inconclusive("Matroska Test Suite not found ({0})", matroskaTestSuitePath);
 			}
 
+
+			bool allPassed = true;
+			StringBuilder result = new StringBuilder();
 			foreach(var filePath in Directory.EnumerateFiles(matroskaTestSuitePath, "*.mkv")) {
-				ParseMatroskaTestSuite_ParseFile(filePath);
+				try {
+					ParseMatroskaTestSuite_ParseFile(filePath);
+					result.AppendLine( filePath + ": Passed");
+				} catch(Exception) {
+					result.AppendLine(filePath + ": Failed");
+					allPassed = false;
+				}
 			}
+
+			Assert.IsTrue(allPassed, result.ToString());
 		}
 
 		public void ParseMatroskaTestSuite_ParseFile(string filePath) {

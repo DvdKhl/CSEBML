@@ -45,7 +45,7 @@ namespace CSEBML {
 			Int64 dataPos = dataSrc.Position;
 			dataSrc.Write(data);
 
-			var elemInfo = new ElementInfo(elem, idPos, vIntPos, dataPos);
+			var elemInfo = new ElementInfo(elem, idPos, vIntPos, dataPos, null);
 
 			UpdateElementLength(elemInfo);
 
@@ -71,7 +71,7 @@ namespace CSEBML {
 			Int64 vIntPos = dataSrc.Position;
 			dataSrc.WriteFakeVInt(8);
 
-			var elemInfo = new MasterElementInfo(elem, idPos, vIntPos, dataSrc.Position);
+			var elemInfo = new MasterElementInfo(elem, idPos, vIntPos, dataSrc.Position, null);
 			elemInfo.Disposed += (s, e) => UpdateElementLength((ElementInfo)s);
 
 			return elemInfo;

@@ -110,12 +110,12 @@ namespace CSEBML.DataSource {
 			Byte encodedSize = block[relativePosition++];
 
 			while((mask & encodedSize) == 0 && bytesToRead++ < 4) mask = (Byte)(mask >> 1);
-			if(bytesToRead == 4) return VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int32
+			if(bytesToRead == 4) return ~VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int32
 
 			Int32 value = 0;
 			for(int i = 0;i < bytesToRead;i++) {
 				if(relativePosition == BlockLength()) {
-					if(absolutePosition + relativePosition + bytesToRead > length) return VIntConsts.BASESOURCE_ERROR; //Unexpected EOF
+					if(absolutePosition + relativePosition + bytesToRead > length) return ~VIntConsts.BASESOURCE_ERROR; //Unexpected EOF
 
 					advance();
 					block = blocks.Current;
@@ -126,7 +126,7 @@ namespace CSEBML.DataSource {
 
 			value += (encodedSize << (bytesToRead << 3));
 
-			return value == VIntConsts.RESERVEDVINTS[bytesToRead] ? VIntConsts.RESERVED : value;
+			return value == VIntConsts.RESERVEDVINTS[bytesToRead] ? ~VIntConsts.RESERVED : value;
 		}
 
 		public Int64 ReadVInt() {
@@ -136,12 +136,12 @@ namespace CSEBML.DataSource {
 			Byte encodedSize = block[relativePosition++];
 
 			while((mask & encodedSize) == 0 && bytesToRead++ < 8) { mask = (Byte)(mask >> 1); }
-			if(bytesToRead == 8) return VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int64
+			if(bytesToRead == 8) return ~VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int64
 
 			Int64 value = 0;
 			for(int i = 0;i < bytesToRead;i++) {
 				if(relativePosition == BlockLength()) {
-					if(absolutePosition + relativePosition + bytesToRead > length) return VIntConsts.BASESOURCE_ERROR; //Unexpected EOF
+					if(absolutePosition + relativePosition + bytesToRead > length) return ~VIntConsts.BASESOURCE_ERROR; //Unexpected EOF
 					advance();
 					block = blocks.Current;
 				}
@@ -151,7 +151,7 @@ namespace CSEBML.DataSource {
 
 			if(relativePosition == BlockLength()) advance();
 
-			return value == VIntConsts.RESERVEDVINTS[bytesToRead] ? VIntConsts.UNKNOWN_LENGTH : value;
+			return value == VIntConsts.RESERVEDVINTS[bytesToRead] ? ~VIntConsts.UNKNOWN_LENGTH : value;
 		}
 
 		public bool HasKnownLength { get { return true; } }

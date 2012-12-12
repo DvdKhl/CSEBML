@@ -16,14 +16,11 @@ namespace CSEBML {
 		public override string ToString() { return DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : ""; }
 		public string ToDetailedString() { return (DocElement != null ? DocElement.Name.ToString() + "(" + Convert.ToString(DocElement.Id, 16) + ")" : "") + " IdPos:" + IdPos + " VIntPos:" + VIntPos + " DataPos:" + DataPos + " Datalength:" + DataLength; }
 
-		public ElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos) {
+		public ElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos, Int64? dataLength) {
 			DocElement = docElement;
 			IdPos = idPos;
 			VIntPos = vintPos;
 			DataPos = dataPos;
-		}
-		public ElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos, Int64 dataLength)
-			: this(docElement, idPos, vintPos, dataPos) {
 			DataLength = dataLength;
 		}
 	}
@@ -32,8 +29,8 @@ namespace CSEBML {
 
 		public void Dispose() { Disposed(this, EventArgs.Empty); }
 
-		public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos, Int64 dataLength) : base(docElement, idPos, vintPos, dataPos, dataLength) { }
-		public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos) : base(docElement, idPos, vintPos, dataPos) { }
+		public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos, Int64? dataLength) : base(docElement, idPos, vintPos, dataPos, dataLength) { }
+		//public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos) : base(docElement, idPos, vintPos, dataPos) { }
 
 	}
 

@@ -60,13 +60,18 @@ namespace CSEBML {
 
 			Int32 docElementId = dataSrc.ReadIdentifier();
 			Int64 vintPos = dataSrc.Position;
-			Int64 dataLength = dataSrc.ReadVInt();
+			Int64? dataLength = dataSrc.ReadVInt();
 
-#pragma warning disable 675
-			if((docElementId | dataLength | VIntConsts.ERROR) != 0) {
+			if(docElementId < 0 && (~docElementId & VIntConsts.ERROR) != 0) {
 				throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
 			}
-#pragma warning restore 675
+
+			if(dataLength < 0 && (~dataLength & VIntConsts.ERROR) != 0) {
+				throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
+			}
+
+			if(~dataLength == VIntConsts.UNKNOWN_LENGTH) dataLength = null;
+
 
 			return currentElement = new ElementInfo(ebmlDoc.RetrieveDocElement(docElementId), idPos, vintPos, dataSrc.Position, dataLength);
 		}
