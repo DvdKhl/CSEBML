@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataSource\VIntConsts.cs" />
     <Compile Include="DocTypes\BaseDocType.cs" />
     <Compile Include="DocTypes\EBML\EBMLDocType.cs" />
     <Compile Include="DocTypes\EBML\EBMLDocElement.cs" />

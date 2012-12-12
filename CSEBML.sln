@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSEBML", "CSEBML\CSEBML.csproj", "{4AEA35D8-1ACD-48E5-9B2D-E6073F72C35B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSEBMLTest", "CSEBMLTest\CSEBMLTest.csproj", "{35594D6B-0EFF-4F9D-8511-4195063C013B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,12 @@ Global
 		{4AEA35D8-1ACD-48E5-9B2D-E6073F72C35B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4AEA35D8-1ACD-48E5-9B2D-E6073F72C35B}.Release|x86.ActiveCfg = Release|x86
 		{4AEA35D8-1ACD-48E5-9B2D-E6073F72C35B}.Release|x86.Build.0 = Release|x86
+		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

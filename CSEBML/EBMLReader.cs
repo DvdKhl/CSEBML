@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using CSEBML.DocTypes;
 using CSEBML.DocTypes.EBML;
 using CSEBML.DataSource;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CSEBML {
 	public class EBMLReader {
@@ -30,7 +31,7 @@ namespace CSEBML {
 		public ReadOnlyCollection<ElementInfo> ParentElements { get { return parentElements.AsReadOnly(); } }
 
 		public Object RetrieveValue() {
-			if(currentElement != null && currentElement.DataLength.HasValue && currentElement.IdPos == dataSrc.Position) {
+			if(currentElement != null && currentElement.DataLength.HasValue && currentElement.DataPos == dataSrc.Position) {
 				Int64 offset;
 				Byte[] valueData = dataSrc.GetData(currentElement.DataLength.Value, out offset);
 				return ebmlDoc.RetrieveValue(currentElement.DocElement, valueData, offset, currentElement.DataLength.Value);
@@ -61,10 +62,11 @@ namespace CSEBML {
 			Int64 vintPos = dataSrc.Position;
 			Int64 dataLength = dataSrc.ReadVInt();
 
-			if(docElementId < 0 || dataLength < 0) {
-				throw new InvalidOperationException("File most likely Corrupted");
-				//TODO Magic code to resync it goes here
+#pragma warning disable 675
+			if((docElementId | dataLength | VIntConsts.ERROR) != 0) {
+				throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
 			}
+#pragma warning restore 675
 
 			return currentElement = new ElementInfo(ebmlDoc.RetrieveDocElement(docElementId), idPos, vintPos, dataSrc.Position, dataLength);
 		}
@@ -94,7 +96,7 @@ namespace CSEBML {
 			if(index < 0) return lengthKnown ? dataSrc.Length : -1;
 
 			ElementInfo elem = index == parentElements.Count ? currentElement : parentElements[index];
-			return elem != null && elem.DataLength.HasValue ? elem.IdPos + elem.DataLength.Value : GetEndOfElement(index - 1);
+			return elem != null && elem.DataLength.HasValue ? elem.DataPos + elem.DataLength.Value : GetEndOfElement(index - 1);
 		}
 	}
 }

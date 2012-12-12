@@ -43,7 +43,7 @@ namespace CSEBML {
 			Int64 vIntPos = dataSrc.Position;
 			dataSrc.WriteFakeVInt(8);
 			Int64 dataPos = dataSrc.Position;
-			var bytesWritten = dataSrc.Write(data);
+			dataSrc.Write(data);
 
 			var elemInfo = new ElementInfo(elem, idPos, vIntPos, dataPos);
 
@@ -51,7 +51,6 @@ namespace CSEBML {
 
 			return elemInfo;
 		}
-
 		public ElementInfo WriteElement(EBMLDocElement elem, byte[] b, int offset, int length) {
 			Int64 idPos = dataSrc.Position;
 			dataSrc.WriteIdentifier(elem.Id);
@@ -73,7 +72,7 @@ namespace CSEBML {
 			dataSrc.WriteFakeVInt(8);
 
 			var elemInfo = new MasterElementInfo(elem, idPos, vIntPos, dataSrc.Position);
-			elemInfo.Disposed += (s, e) => UpdateElementLength(elemInfo);
+			elemInfo.Disposed += (s, e) => UpdateElementLength((ElementInfo)s);
 
 			return elemInfo;
 		}

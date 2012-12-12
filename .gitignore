@@ -1,4 +1,5 @@
 Thumbs.db
+
 *.obj
 *.exe
 *.pdb
@@ -27,3 +28,4 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 *.vssscc
 $tf*/
+CSEBMLTest/TestFiles/

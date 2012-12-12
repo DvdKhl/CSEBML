@@ -45,7 +45,7 @@ namespace CSEBML.DocTypes.Matroska {
 
                 } else if(laceType == LaceType.Xiph) {
                     int i = 0;
-                    while(i++ != FrameCount) if(data[offset++] != 0xFF) ;
+                    while(i++ != FrameCount) if(data[offset++] != 0xFF) break;
                 }
             } else FrameCount = 1;
 

@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 namespace CSEBML.DataSource {
 	public class EBMLBlockDataSource : IEBMLDataSource, IDisposable {
-		private static Int64[] UNKOWNSIZES = { 0x7F, 0x3FFF, 0x1FFFFF, 0x0FFFFFFF, 0x07FFFFFFFF, 0x03FFFFFFFFFF, 0x01FFFFFFFFFFFF, 0x00FFFFFFFFFFFFFF };
-
 		IEnumerator<byte[]> blocks;
 
 		private Int64 absolutePosition;
@@ -112,12 +110,12 @@ namespace CSEBML.DataSource {
 			Byte encodedSize = block[relativePosition++];
 
 			while((mask & encodedSize) == 0 && bytesToRead++ < 4) mask = (Byte)(mask >> 1);
-			if(bytesToRead == 4) return -1; //Identifiers are Int32
+			if(bytesToRead == 4) return VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int32
 
 			Int32 value = 0;
 			for(int i = 0;i < bytesToRead;i++) {
 				if(relativePosition == BlockLength()) {
-					if(absolutePosition + relativePosition + bytesToRead > length) return -2; //Unexpected EOF
+					if(absolutePosition + relativePosition + bytesToRead > length) return VIntConsts.BASESOURCE_ERROR; //Unexpected EOF
 
 					advance();
 					block = blocks.Current;
@@ -126,7 +124,9 @@ namespace CSEBML.DataSource {
 			}
 			if(relativePosition == BlockLength()) advance();
 
-			return value + (encodedSize << (bytesToRead << 3));
+			value += (encodedSize << (bytesToRead << 3));
+
+			return value == VIntConsts.RESERVEDVINTS[bytesToRead] ? VIntConsts.RESERVED : value;
 		}
 
 		public Int64 ReadVInt() {
@@ -136,12 +136,12 @@ namespace CSEBML.DataSource {
 			Byte encodedSize = block[relativePosition++];
 
 			while((mask & encodedSize) == 0 && bytesToRead++ < 8) { mask = (Byte)(mask >> 1); }
-			if(bytesToRead == 8) return -1; // //Identifiers are Int64
+			if(bytesToRead == 8) return VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int64
 
 			Int64 value = 0;
 			for(int i = 0;i < bytesToRead;i++) {
 				if(relativePosition == BlockLength()) {
-					if(absolutePosition + relativePosition + bytesToRead > length) return -2; //Unexpected EOF
+					if(absolutePosition + relativePosition + bytesToRead > length) return VIntConsts.BASESOURCE_ERROR; //Unexpected EOF
 					advance();
 					block = blocks.Current;
 				}
@@ -150,12 +150,11 @@ namespace CSEBML.DataSource {
 			value += (encodedSize ^ mask) << (bytesToRead << 3);
 
 			if(relativePosition == BlockLength()) advance();
-			return value == UNKOWNSIZES[bytesToRead] ? -3 : value;
+
+			return value == VIntConsts.RESERVEDVINTS[bytesToRead] ? VIntConsts.UNKNOWN_LENGTH : value;
 		}
 
-
 		public bool HasKnownLength { get { return true; } }
-
 
 		public bool EOF { get { return Length == Position; } }
 
@@ -163,13 +162,9 @@ namespace CSEBML.DataSource {
 		public void WriteVInt(long value, int vIntLength) { throw new NotSupportedException(); }
 		public void WriteFakeVInt(int vIntLength) { throw new NotSupportedException(); }
 		public void Write(byte[] b, int offset, int length) { throw new NotSupportedException(); }
-		public long Write(System.IO.Stream source) {			throw new NotSupportedException();		}
-
-
+		public long Write(System.IO.Stream source) { throw new NotSupportedException(); }
 
 		public void Dispose() { blocks.Dispose(); }
-
-
 	}
 
 }

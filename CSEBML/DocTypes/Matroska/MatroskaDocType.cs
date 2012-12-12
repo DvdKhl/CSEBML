@@ -27,7 +27,7 @@ namespace CSEBML.DocTypes.Matroska {
 			throw new NotImplementedException();
 		}
 
-
+		#region DocElements
 		public static readonly EBMLDocElement Segment = new EBMLDocElement(0x18538067, EBMLElementType.Master, "Segment");
 		public static readonly EBMLDocElement SeekHead = new EBMLDocElement(0x114D9B74, EBMLElementType.Master, "SeekHead");
 		public static readonly EBMLDocElement Seek = new EBMLDocElement(0x00004DBB, EBMLElementType.Master, "Seek");
@@ -226,6 +226,7 @@ namespace CSEBML.DocTypes.Matroska {
 		public static readonly EBMLDocElement TagDefault = new EBMLDocElement(0x00004484, EBMLElementType.UInteger, "TagDefault");
 		public static readonly EBMLDocElement TagString = new EBMLDocElement(0x00004487, EBMLElementType.UTF8, "TagString");
 		public static readonly EBMLDocElement TagBinary = new EBMLDocElement(0x00004485, EBMLElementType.Binary, "TagBinary");
+		#endregion
 
 		public static Dictionary<Int32, MatroskaDocMetaElement> metaList = new Dictionary<int, MatroskaDocMetaElement>();
 		static MatroskaDocType() { metaList = CreateMetaData().ToDictionary(item => item.Id); }
@@ -436,7 +437,7 @@ namespace CSEBML.DocTypes.Matroska {
 		}
 	}
 
-	public enum MatroskaVersion { V1 = 1, V2 = 2, V3 = 3, WebM = 1024 }
+	public enum MatroskaVersion { Unknown = 0, V1 = 1, V2 = 2, V3 = 4, WebM = 1024 }
 
 
 

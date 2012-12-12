@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>2037f970-248e-41c9-a042-a513af699c5a</ProjectGuid>
+    <ProjectGuid>{35594D6B-0EFF-4F9D-8511-4195063C013B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CSEBMLTest</RootNamespace>
@@ -50,9 +50,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="EBMLWriterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EBMLReaderTests.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSEBML\CSEBML.csproj">
+      <Project>{4aea35d8-1acd-48e5-9b2d-e6073f72c35b}</Project>
+      <Name>CSEBML</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
