@@ -39,7 +39,17 @@ namespace CSEBML {
 		//	dataSrc.Position = position;
 		//}
 
-		public ElementInfo NextElementInfo() {
+		public void Reset() { dataSrc.Position = nextElementPos = lastElementPos = 0; }
+		public ElementInfo JumpToElementAt(Int64 elemPos) {
+			dataSrc.Position = elemPos;
+			nextElementPos = elemPos;
+			lastElementPos = ~VIntConsts.UNKNOWN_LENGTH; //TODO: Check corner cases
+
+			return Next();
+		}
+
+
+		public ElementInfo Next() {
 			if(nextElementPos == lastElementPos || nextElementPos == ~VIntConsts.UNKNOWN_LENGTH || dataSrc.EOF) return null;
 			if(dataSrc.Position != nextElementPos) dataSrc.Position = nextElementPos;
 
@@ -65,7 +75,7 @@ namespace CSEBML {
 			return elemInfo;
 		}
 
-		public IDisposable EnterMasterElement(ElementInfo elemInfo) {
+		public IDisposable EnterElement(ElementInfo elemInfo) {
 			var disposable = new PreviousState {
 				NextElementPos = nextElementPos,
 				LastElementPos = lastElementPos
