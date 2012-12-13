@@ -9,99 +9,85 @@ using System.Diagnostics.CodeAnalysis;
 namespace CSEBML {
 	public class EBMLReader {
 		public const Int32 TargetEBMLVersion = 1;
-		private readonly Boolean lengthKnown;
 
 		private IEBMLDoc ebmlDoc;
 		private IEBMLDataSource dataSrc;
-
-		private List<ElementInfo> parentElements;
-		private ElementInfo currentElement;
-
+		private Int64 nextElementPos, lastElementPos;
 
 		public EBMLReader(IEBMLDataSource dataSrc, IEBMLDoc ebmlDoc) {
-			parentElements = new List<ElementInfo>();
-
-			lengthKnown = dataSrc.HasKnownLength;
-
 			this.dataSrc = dataSrc;
 			this.ebmlDoc = ebmlDoc;
+
+			lastElementPos = dataSrc.HasKnownLength ? dataSrc.Length : ~VIntConsts.UNKNOWN_LENGTH;
 		}
 
 		public IEBMLDataSource BaseStream { get { return dataSrc; } }
-		public ReadOnlyCollection<ElementInfo> ParentElements { get { return parentElements.AsReadOnly(); } }
 
-		public Object RetrieveValue() {
-			if(currentElement != null && currentElement.DataLength.HasValue && currentElement.DataPos == dataSrc.Position) {
+		public Object RetrieveValue(ElementInfo elem) {
+			if(elem != null && elem.DataLength.HasValue && elem.DataPos == dataSrc.Position) {
 				Int64 offset;
-				Byte[] valueData = dataSrc.GetData(currentElement.DataLength.Value, out offset);
-				return ebmlDoc.RetrieveValue(currentElement.DocElement, valueData, offset, currentElement.DataLength.Value);
-
+				Byte[] valueData = dataSrc.GetData(elem.DataLength.Value, out offset);
+				return ebmlDoc.RetrieveValue(elem.DocElement, valueData, offset, elem.DataLength.Value);
 			} else throw new InvalidOperationException("Cannot read value: Invalid State");
 		}
 
-		public void JumpTo(Int64 position) {
-			while(true) {
-				if(parentElements[parentElements.Count - 1].IdPos < position && GetEndOfElement(parentElements.Count) > position) break;
-				LeaveMasterElement();
-			}
-			dataSrc.Position = position;
-		}
+		//public void JumpTo(Int64 position) {
+		//	while(true) {
+		//		if(parentElements[parentElements.Count - 1].IdPos < position && GetEndOfElement(parentElements.Count) > position) break;
+		//		LeaveMasterElement();
+		//	}
+		//	dataSrc.Position = position;
+		//}
 
 		public ElementInfo NextElementInfo() {
-			Int64 idPos = dataSrc.Position;
-
-			if(currentElement != null) {
-				idPos = GetEndOfElement(parentElements.Count); //dataSrc.Position;
-				if(idPos != dataSrc.Position) dataSrc.Position = idPos;
-			}
-
-			if(GetEndOfElement(parentElements.Count - 1) == idPos || dataSrc.EOF) return null;
-
+			if(nextElementPos == lastElementPos || nextElementPos == ~VIntConsts.UNKNOWN_LENGTH || dataSrc.EOF) return null;
+			if(dataSrc.Position != nextElementPos) dataSrc.Position = nextElementPos;
 
 			Int32 docElementId = dataSrc.ReadIdentifier();
 			Int64 vintPos = dataSrc.Position;
 			Int64? dataLength = dataSrc.ReadVInt();
+			Int64 dataPos = dataSrc.Position;
 
 			if(docElementId < 0 && (~docElementId & VIntConsts.ERROR) != 0) {
 				throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
 			}
 
-			if(dataLength < 0 && (~dataLength & VIntConsts.ERROR) != 0) {
-				throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
+			if(dataLength.HasValue && dataLength < 0) {
+				if((~dataLength & VIntConsts.ERROR) != 0) throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
+				if(~dataLength == VIntConsts.UNKNOWN_LENGTH) dataLength = null;
 			}
 
-			if(~dataLength == VIntConsts.UNKNOWN_LENGTH) dataLength = null;
+			var docElem = ebmlDoc.RetrieveDocElement(docElementId);
+			var elemInfo = new ElementInfo(docElem, nextElementPos, vintPos, dataPos, dataLength);
 
+			nextElementPos = dataLength.HasValue ? dataPos + dataLength.Value : ~VIntConsts.UNKNOWN_LENGTH;
 
-			return currentElement = new ElementInfo(ebmlDoc.RetrieveDocElement(docElementId), idPos, vintPos, dataSrc.Position, dataLength);
+			return elemInfo;
 		}
 
-		public void EnterMasterElement() {
-			if(currentElement != null && currentElement.DocElement.Type == EBMLElementType.Master) {
-				parentElements.Add(currentElement);
-				currentElement = null;
-			} else throw new InvalidOperationException("Cannot enter non Master Element");
+		public IDisposable EnterMasterElement(ElementInfo elemInfo) {
+			var disposable = new PreviousState {
+				NextElementPos = nextElementPos,
+				LastElementPos = lastElementPos
+			};
+
+			disposable.Disposed += (s, e) => {
+				var d = (PreviousState)s;
+				nextElementPos = d.NextElementPos;
+				lastElementPos = d.LastElementPos;
+			};
+
+			nextElementPos = elemInfo.DataPos;
+			lastElementPos = elemInfo.DataLength.HasValue ? elemInfo.DataPos + elemInfo.DataLength.Value : ~VIntConsts.UNKNOWN_LENGTH;
+
+			return disposable;
 		}
 
-		public void LeaveMasterElement() { LeaveMasterElements(-1); }
-		public void LeaveMasterElements(Int32 toLevel) {
-			if(parentElements.Count != 0) {
-				if(toLevel < 0 & -toLevel <= parentElements.Count) {
-					toLevel = parentElements.Count + toLevel;
-				} else throw new InvalidOperationException("Invalid Level");
+		private sealed class PreviousState : IDisposable {
+			public event EventHandler Disposed = delegate { };
+			public void Dispose() { Disposed(this, EventArgs.Empty); Disposed = null; }
 
-				//dataSrc.Position = GetEndOfElement(toLevel);
-				parentElements.RemoveRange(toLevel, parentElements.Count - toLevel);
-				currentElement = null;
-
-			} else throw new InvalidOperationException("No Master Elements to leave");
-		}
-
-		private Int64 GetEndOfElement(Int32 index) {
-			if(index < 0) return lengthKnown ? dataSrc.Length : -1;
-
-			ElementInfo elem = index == parentElements.Count ? currentElement : parentElements[index];
-			return elem != null && elem.DataLength.HasValue ? elem.DataPos + elem.DataLength.Value : GetEndOfElement(index - 1);
+			public Int64 NextElementPos, LastElementPos;
 		}
 	}
 }
