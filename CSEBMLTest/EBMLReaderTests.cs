@@ -55,11 +55,11 @@ namespace CSEBMLTest {
 			ElementInfo elemInfo;
 			while((elemInfo = reader.NextElementInfo())!=null) {
 				if(elemInfo.DocElement.Type == EBMLElementType.Master) {
-					reader.EnterMasterElement();
-					Recurse(reader, readValues);
-					reader.LeaveMasterElement();
+					using(reader.EnterMasterElement(elemInfo)) {
+						Recurse(reader, readValues);
+					}
 				} else {
-					var obj = reader.RetrieveValue();
+					var obj = reader.RetrieveValue(elemInfo);
 				}
 			}
 		}
