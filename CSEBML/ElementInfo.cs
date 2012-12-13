@@ -27,7 +27,7 @@ namespace CSEBML {
 	public class MasterElementInfo : ElementInfo, IDisposable {
 		public event EventHandler Disposed = delegate { };
 
-		public void Dispose() { Disposed(this, EventArgs.Empty); }
+		public void Dispose() { Disposed(this, EventArgs.Empty); Disposed = null; }
 
 		public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos, Int64? dataLength) : base(docElement, idPos, vintPos, dataPos, dataLength) { }
 		//public MasterElementInfo(EBMLDocElement docElement, Int64 idPos, Int64 vintPos, Int64 dataPos) : base(docElement, idPos, vintPos, dataPos) { }

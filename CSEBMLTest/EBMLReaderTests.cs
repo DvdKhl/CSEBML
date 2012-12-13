@@ -53,9 +53,9 @@ namespace CSEBMLTest {
 
 		private static void Recurse(EBMLReader reader, bool readValues) {
 			ElementInfo elemInfo;
-			while((elemInfo = reader.NextElementInfo())!=null) {
+			while((elemInfo = reader.Next())!=null) {
 				if(elemInfo.DocElement.Type == EBMLElementType.Master) {
-					reader.EnterMasterElement();
+					reader.EnterElement();
 					Recurse(reader, readValues);
 					reader.LeaveMasterElement();
 				} else {
