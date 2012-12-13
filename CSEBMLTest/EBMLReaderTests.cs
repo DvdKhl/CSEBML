@@ -12,13 +12,11 @@ namespace CSEBMLTest {
 	public class EBMLReaderTests {
 		[TestMethod]
 		public void ParseMatroskaTestSuite() {
-
 			var matroskaTestSuitePath = Path.Combine("TestFiles", "MatroskaTestSuite");
 
 			if(!Directory.Exists(matroskaTestSuitePath)) {
 				Assert.Inconclusive("Matroska Test Suite not found ({0})", matroskaTestSuitePath);
 			}
-
 
 			bool allPassed = true;
 			StringBuilder result = new StringBuilder();
@@ -34,7 +32,6 @@ namespace CSEBMLTest {
 
 			Assert.IsTrue(allPassed, result.ToString());
 		}
-
 		public void ParseMatroskaTestSuite_ParseFile(string filePath) {
 			Stream src;
 			try {
@@ -51,15 +48,27 @@ namespace CSEBMLTest {
 			Recurse(ebmlReader, true);
 		}
 
+
+		[TestMethod]
+		public void GetBaseStream() {
+			var dataSrc = new EBMLBlockDataSource(new byte[][] { new byte[0] }, 0);
+			var docType = new EBMLDocType(null);
+			var reader = new EBMLReader(dataSrc, docType);
+
+			Assert.AreEqual(dataSrc, reader.BaseStream);
+		}
+
+
+
 		private static void Recurse(EBMLReader reader, bool readValues) {
 			ElementInfo elemInfo;
 			while((elemInfo = reader.Next())!=null) {
 				if(elemInfo.DocElement.Type == EBMLElementType.Master) {
-					reader.EnterElement();
-					Recurse(reader, readValues);
-					reader.LeaveMasterElement();
+					using(reader.EnterElement(elemInfo)) {
+						Recurse(reader, readValues);
+					}
 				} else {
-					var obj = reader.RetrieveValue();
+					var obj = reader.RetrieveValue(elemInfo);
 				}
 			}
 		}

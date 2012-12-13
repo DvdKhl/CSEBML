@@ -31,14 +31,6 @@ namespace CSEBML {
 			} else throw new InvalidOperationException("Cannot read value: Invalid State");
 		}
 
-		//public void JumpTo(Int64 position) {
-		//	while(true) {
-		//		if(parentElements[parentElements.Count - 1].IdPos < position && GetEndOfElement(parentElements.Count) > position) break;
-		//		LeaveMasterElement();
-		//	}
-		//	dataSrc.Position = position;
-		//}
-
 		public void Reset() { dataSrc.Position = nextElementPos = lastElementPos = 0; }
 		public ElementInfo JumpToElementAt(Int64 elemPos) {
 			dataSrc.Position = elemPos;
