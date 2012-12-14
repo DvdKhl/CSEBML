@@ -1,6 +1,6 @@
-﻿using CSEBML.DataSource;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using CSEBML.DataSource;
 using CSEBML.DocTypes;
-using CSEBML.DocTypes.EBML;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,10 +10,10 @@ using System.Linq;
 
 namespace CSEBML {
 	public class EBMLWriter {
-		private IEBMLDoc ebmlDoc;
+		private EBMLDocType ebmlDoc;
 		private IEBMLDataSource dataSrc;
 
-		public EBMLWriter(IEBMLDataSource dataSrc, IEBMLDoc ebmlDoc) {
+		public EBMLWriter(IEBMLDataSource dataSrc, EBMLDocType ebmlDoc) {
 			this.dataSrc = dataSrc;
 			this.ebmlDoc = ebmlDoc;
 		}
@@ -90,7 +90,7 @@ namespace CSEBML {
 		}
 
 
-		public static void Optimize(IEBMLDoc ebmlDoc, Stream source, Stream target) {
+		public static void Optimize(EBMLDocType ebmlDoc, Stream source, Stream target) {
 			var dataSrc = new EBMLStreamDataSource(source);
 			var dataTrg = new EBMLStreamDataSource(target);
 

@@ -1,4 +1,5 @@
-﻿using CSEBML.DocTypes.EBML;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using CSEBML.DocTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

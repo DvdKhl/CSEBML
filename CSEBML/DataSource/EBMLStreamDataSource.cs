@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using System.IO;
 using System;
 namespace CSEBML.DataSource {
 	public class EBMLStreamDataSource : IEBMLDataSource {

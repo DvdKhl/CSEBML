@@ -1,33 +1,35 @@
-﻿using System;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CSEBML.DocTypes;
-using CSEBML.DocTypes.EBML;
 using CSEBML.DataSource;
 using System.Diagnostics.CodeAnalysis;
 
 namespace CSEBML {
 	public class EBMLReader {
-		public const Int32 TargetEBMLVersion = 1;
-
-		private IEBMLDoc ebmlDoc;
+		private EBMLDocType docType;
 		private IEBMLDataSource dataSrc;
 		private Int64 nextElementPos, lastElementPos;
 
-		public EBMLReader(IEBMLDataSource dataSrc, IEBMLDoc ebmlDoc) {
+		public event EventHandler DataError;
+
+		public EBMLReader(IEBMLDataSource dataSrc, EBMLDocType ebmlDoc) {
 			this.dataSrc = dataSrc;
-			this.ebmlDoc = ebmlDoc;
+			this.docType = ebmlDoc;
 
 			lastElementPos = dataSrc.HasKnownLength ? dataSrc.Length : ~VIntConsts.UNKNOWN_LENGTH;
 		}
 
 		public IEBMLDataSource BaseStream { get { return dataSrc; } }
+		public EBMLDocType DocType { get { return docType; } }
 
 		public Object RetrieveValue(ElementInfo elem) {
 			if(elem != null && elem.DataLength.HasValue && elem.DataPos == dataSrc.Position) {
 				Int64 offset;
 				Byte[] valueData = dataSrc.GetData(elem.DataLength.Value, out offset);
-				return ebmlDoc.RetrieveValue(elem.DocElement, valueData, offset, elem.DataLength.Value);
+				return docType.RetrieveValue(elem.DocElement, valueData, offset, elem.DataLength.Value);
 			} else throw new InvalidOperationException("Cannot read value: Invalid State");
 		}
 
@@ -35,7 +37,7 @@ namespace CSEBML {
 		public ElementInfo JumpToElementAt(Int64 elemPos) {
 			dataSrc.Position = elemPos;
 			nextElementPos = elemPos;
-			lastElementPos = ~VIntConsts.UNKNOWN_LENGTH; //TODO: Check corner cases
+			lastElementPos = dataSrc.HasKnownLength ? dataSrc.Length : ~VIntConsts.UNKNOWN_LENGTH;
 
 			return Next();
 		}
@@ -47,22 +49,21 @@ namespace CSEBML {
 
 			Int32 docElementId = dataSrc.ReadIdentifier();
 			Int64 vintPos = dataSrc.Position;
-			Int64? dataLength = dataSrc.ReadVInt();
+			Int64 dataLength = dataSrc.ReadVInt();
 			Int64 dataPos = dataSrc.Position;
 
-			if(docElementId < 0 && (~docElementId & VIntConsts.ERROR) != 0) {
-				throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
+			if((docElementId < 0 && (~docElementId & VIntConsts.ERROR) != 0) || (dataLength < 0 && (~dataLength & VIntConsts.ERROR) != 0)) {
+				var dataError = DataError;
+				if(dataError != null) {
+					dataError(this, EventArgs.Empty);
+					return new ElementInfo(EBMLDocElement.Unknown, nextElementPos, vintPos, dataPos, 0);
+				} else throw new EBMLDataException("File most likely Corrupted");
 			}
 
-			if(dataLength.HasValue && dataLength < 0) {
-				if((~dataLength & VIntConsts.ERROR) != 0) throw new InvalidOperationException("File most likely Corrupted"); //TODO Magic code to resync it goes here
-				if(~dataLength == VIntConsts.UNKNOWN_LENGTH) dataLength = null;
-			}
+			var docElem = docType.RetrieveDocElement(docElementId);
+			var elemInfo = new ElementInfo(docElem, nextElementPos, vintPos, dataPos, dataLength < 0 ? (Int64?)null : dataLength);
 
-			var docElem = ebmlDoc.RetrieveDocElement(docElementId);
-			var elemInfo = new ElementInfo(docElem, nextElementPos, vintPos, dataPos, dataLength);
-
-			nextElementPos = dataLength.HasValue ? dataPos + dataLength.Value : ~VIntConsts.UNKNOWN_LENGTH;
+			nextElementPos = dataLength < 0 ? ~VIntConsts.UNKNOWN_LENGTH : dataPos + dataLength;
 
 			return elemInfo;
 		}
@@ -85,7 +86,7 @@ namespace CSEBML {
 			return disposable;
 		}
 
-		private sealed class PreviousState : IDisposable {
+		protected sealed class PreviousState : IDisposable {
 			public event EventHandler Disposed = delegate { };
 			public void Dispose() { Disposed(this, EventArgs.Empty); Disposed = null; }
 

@@ -66,20 +66,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataSource\VIntConsts.cs" />
-    <Compile Include="DocTypes\BaseDocType.cs" />
-    <Compile Include="DocTypes\EBML\EBMLDocType.cs" />
-    <Compile Include="DocTypes\EBML\EBMLDocElement.cs" />
-    <Compile Include="DocTypes\IDocType.cs" />
-    <Compile Include="DocTypes\IEBMLDoc.cs" />
+    <Compile Include="DocTypes\EBMLDocType.cs" />
+    <Compile Include="DocTypes\EBMLDocElement.cs" />
     <Compile Include="DocTypes\Matroska\MatroskaBlock.cs" />
     <Compile Include="DocTypes\Matroska\MatroskaDocType.cs" />
     <Compile Include="DocTypes\Matroska\MatroskaDocMetaElement.cs" />
     <Compile Include="DocTypes\MCChronicles\MCChroniclesDocType.cs" />
+    <Compile Include="EBMLDataException.cs" />
     <Compile Include="ElementInfo.cs" />
     <Compile Include="DataSource\EBMLBlockDataSource.cs" />
-    <Compile Include="CSEBMLException.cs" />
     <Compile Include="EBMLReader.cs" />
-    <Compile Include="EBMLStream.cs" />
     <Compile Include="EBMLWriter.cs" />
     <Compile Include="DataSource\IEBMLDataSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

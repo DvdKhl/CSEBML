@@ -1,4 +1,5 @@
-﻿using System;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using System;
 using System.Collections.Generic;
 using System.Text;
 

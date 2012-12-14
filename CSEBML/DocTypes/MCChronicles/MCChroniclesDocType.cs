@@ -1,12 +1,14 @@
-﻿using System;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CSEBML.DocTypes.EBML;
+using CSEBML.DocTypes;
 
 namespace CSEBML.DocTypes.MCChronicles {
-	public class MCChroniclesDocType : IDocType {
-		public object RetrieveValue(EBMLDocElement docElem, byte[] data, long offset, long length) {
+	public class MCChroniclesDocType : EBMLDocType {
+
+		protected override object RetrieveByExtension(EBMLDocElement docElem, byte[] data, long offset, long length) {
 			if(docElem.Id == Position.Id || docElem.Id == Motion.Id) {
 				return new double[] { 
 					EBMLDocType.RetrieveDouble(data, offset),
@@ -63,7 +65,8 @@ namespace CSEBML.DocTypes.MCChronicles {
 			throw new Exception("Unknown Element");
 		}
 
-		public byte[] TransformDocElement(EBMLDocElement docElem, object value) {
+
+		protected override byte[] TransformElement(EBMLDocElement docElem, object value) {
 			if(docElem.Id == Position.Id || docElem.Id == Motion.Id) {
 				var v = (double[])value;
 				var b = new Byte[24];
@@ -172,6 +175,5 @@ namespace CSEBML.DocTypes.MCChronicles {
 		public static readonly EBMLDocElement TileEntity = new EBMLDocElement(0x2B3925, EBMLElementType.Master, "TileEntity");
 		public static readonly EBMLDocElement TileTicks = new EBMLDocElement(0x16B5F49D, EBMLElementType.Master, "TileTicks");
 		public static readonly EBMLDocElement TileTick = new EBMLDocElement(0x354042, EBMLElementType.Master, "TileTick");
-
 	}
 }

@@ -1,22 +1,38 @@
-﻿using CSEBML.DocTypes.EBML;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using CSEBML.DocTypes;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
-namespace CSEBML.DocTypes.EBML {
-	public class EBMLDocType : BaseDocType, IEBMLDoc {
+namespace CSEBML.DocTypes {
+	public class EBMLDocType {
+		protected Dictionary<Int32, EBMLDocElement> docElementMap;
 
-		public EBMLDocType(IDocType docExt) : base(docExt) { }
+		public EBMLDocType() {
+			docElementMap = GetDocElements(this.GetType(), null).ToDictionary(item => item.Id);
 
-		public override EBMLDocElement RetrieveDocElement(Int32 id) {
+		}
+
+		private static IEnumerable<EBMLDocElement> GetDocElements(Type type, Predicate<EBMLDocElement> filter) {
+			var fields = type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField);
+			foreach(var field in fields) {
+				var obj = field.GetValue(null);
+				if(obj is EBMLDocElement && (filter == null || filter((EBMLDocElement)obj))) yield return (EBMLDocElement)obj;
+			}
+		}
+
+
+		public EBMLDocElement RetrieveDocElement(Int32 id) {
 			EBMLDocElement elementType = (docElementMap.TryGetValue(id, out elementType) ? elementType : null);
 			if(elementType == null) elementType = new EBMLDocElement(id, EBMLElementType.Unknown, "Unknown");
 
 			return elementType;
 		}
 
-		public override object RetrieveValue(EBMLDocElement docElem, Byte[] data, Int64 offset, Int64 length) {
+		public object RetrieveValue(EBMLDocElement docElem, Byte[] data, Int64 offset, Int64 length) {
 			if(offset > Int32.MaxValue || length > Int32.MaxValue) throw new Exception();
 
 			switch(docElem.Type) {
@@ -30,10 +46,12 @@ namespace CSEBML.DocTypes.EBML {
 				case EBMLElementType.UTF8: return RetrieveUTF8(data, offset, length);
 				case EBMLElementType.ASCII: return RetrieveASCII(data, offset, length);
 				case EBMLElementType.Date: return RetrieveDate(data, offset, length);
-				case EBMLElementType.Custom: return extension.RetrieveValue(docElem, data, offset, length);
+				case EBMLElementType.Custom: return RetrieveByExtension(docElem, data, offset, length);
 				default: throw new Exception("Unhandled ElementType");
 			}
 		}
+
+
 		public static Byte[] RetrieveBinary(Byte[] data, Int64 offset, Int64 length) {
 			Byte[] value = new Byte[length];
 			Buffer.BlockCopy(data, (Int32)offset, value, 0, (Int32)length);
@@ -68,11 +86,12 @@ namespace CSEBML.DocTypes.EBML {
 			for(Int32 i = 0;i < length;i++) nanos += (Int64)data[offset + i] << (((Int32)length - i - 1) << 3);
 			return new DateTime(2001, 1, 1, 0, 0, 0).Add(TimeSpan.FromTicks(nanos / 100));
 		}
+		protected virtual object RetrieveByExtension(EBMLDocElement docElem, byte[] data, long offset, long length) { throw new NotSupportedException(); }
 
-		public override Int32 MaxDocTypeReadVersion { get { return 1; } }
+		public Int32 MaxEBMLReadVersion { get { return 1; } }
 
 
-
+		#region DocTypes
 		public static readonly EBMLDocElement EBMLHeader = new EBMLDocElement(0x1A45DFA3, EBMLElementType.Master, "EBMLHeader");
 		public static readonly EBMLDocElement EBMLVersion = new EBMLDocElement(0x4286, EBMLElementType.UInteger, "EBMLVersion");
 		public static readonly EBMLDocElement EBMLReadVersion = new EBMLDocElement(0x42F7, EBMLElementType.UInteger, "EBMLReadVersion");
@@ -83,7 +102,7 @@ namespace CSEBML.DocTypes.EBML {
 		public static readonly EBMLDocElement DocTypeReadVersion = new EBMLDocElement(0x4285, EBMLElementType.UInteger, "DocTypeReadVersion");
 		public static readonly EBMLDocElement CRC32 = new EBMLDocElement(0xBF, EBMLElementType.Binary, "CRC32");
 		public static readonly EBMLDocElement Void = new EBMLDocElement(0xEC, EBMLElementType.Binary, "Void");
-
+		#endregion
 
 
 		public Byte[] TransformDocElement(EBMLDocElement elem, Object value) {
@@ -92,11 +111,10 @@ namespace CSEBML.DocTypes.EBML {
 				case EBMLElementType.SInteger: return TransformElement((Int64)value);
 				case EBMLElementType.UInteger: return TransformElement((UInt64)value);
 				case EBMLElementType.Float: return value is Single ? TransformElement((Single)value) : TransformElement((Double)value);
-				//case EBMLElementType.Double: return TransformElement((Double)value);
 				case EBMLElementType.UTF8: return TransformElement((String)value, false);
 				case EBMLElementType.ASCII: return TransformElement((String)value, true);
 				case EBMLElementType.Date: return TransformElement((DateTime)value);
-				case EBMLElementType.Custom: return extension.TransformDocElement(elem, value);
+				case EBMLElementType.Custom: return TransformDocElement(elem, value);
 				case EBMLElementType.Unknown:
 				case EBMLElementType.Master:
 				default: throw new Exception();
@@ -129,6 +147,6 @@ namespace CSEBML.DocTypes.EBML {
 			var nanos = (value - new DateTime(2001, 1, 1, 0, 0, 0)).Ticks / 100;
 			return TransformElement(nanos);
 		}
-
+		protected virtual Byte[] TransformElement(EBMLDocElement elem, Object value) { throw new NotSupportedException(); }
 	}
 }

@@ -1,6 +1,7 @@
-﻿using System;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using System;
 
-namespace CSEBML.DocTypes.EBML {
+namespace CSEBML.DocTypes {
 	public class EBMLDocElement {
 		public String Name { get; private set; }
 		public EBMLElementType Type { get; private set; }
@@ -12,7 +13,7 @@ namespace CSEBML.DocTypes.EBML {
 			Id = id;
 		}
 
-
+		public static EBMLDocElement Unknown { get { return unknown; } } private static EBMLDocElement unknown = new EBMLDocElement(-1, EBMLElementType.Unknown, "Unknown");
 	}
 
 	[Flags]
@@ -23,11 +24,10 @@ namespace CSEBML.DocTypes.EBML {
 		SInteger = 1 << 2,
 		UInteger = 1 << 3,
 		Float = 1 << 4,
-		//Double = 1 << 5,
 		UTF8 = 1 << 6,
 		ASCII = 1 << 7,
 		Date = 1 << 8,
 
-		Custom = 1 << 30,
+		Custom = 1 << 31,
 	}
 }

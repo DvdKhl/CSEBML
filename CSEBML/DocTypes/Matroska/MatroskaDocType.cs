@@ -1,4 +1,5 @@
-﻿using CSEBML.DocTypes.EBML;
+﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
+using CSEBML.DocTypes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,15 +7,14 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace CSEBML.DocTypes.Matroska {
-	public class MatroskaDocType : IDocType {
+	public class MatroskaDocType : EBMLDocType {
 		private MatroskaVersion version;
 
 		public MatroskaDocType(MatroskaVersion version) { this.version = version; }
 
 		public int MaxDocTypeReadVersion { get { return 3; } }
 
-
-		public object RetrieveValue(EBML.EBMLDocElement docElem, byte[] data, long offset, long length) {
+		protected override object RetrieveByExtension(EBMLDocElement docElem, byte[] data, long offset, long length) {
 			if(docElem.Id == (int)Block.Id || docElem.Id == (int)SimpleBlock.Id) {
 				return new MatroskaBlock(data, offset, (int)length);
 			} else {
@@ -22,10 +22,7 @@ namespace CSEBML.DocTypes.Matroska {
 			}
 		}
 
-
-		public byte[] TransformDocElement(EBMLDocElement elem, object value = null) {
-			throw new NotImplementedException();
-		}
+		protected override byte[] TransformElement(EBMLDocElement elem, object value) { throw new NotImplementedException(); }
 
 		#region DocElements
 		public static readonly EBMLDocElement Segment = new EBMLDocElement(0x18538067, EBMLElementType.Master, "Segment");
@@ -229,9 +226,9 @@ namespace CSEBML.DocTypes.Matroska {
 		#endregion
 
 		public static Dictionary<Int32, MatroskaDocMetaElement> metaList = new Dictionary<int, MatroskaDocMetaElement>();
-		static MatroskaDocType() { metaList = CreateMetaData().ToDictionary(item => item.Id); }
+		static MatroskaDocType() { metaList = EnumerateMetaData().ToDictionary(item => item.Id); }
 
-		private static IEnumerable<MatroskaDocMetaElement> CreateMetaData() {
+		private static IEnumerable<MatroskaDocMetaElement> EnumerateMetaData() {
 			Predicate<object> notNull = obj => obj is ulong ? ((ulong)obj != 0) : (obj is double ? ((double)obj != 0) : (obj is float ? ((float)obj != 0) : (obj is long ? ((long)obj != 0) : false)));
 			Predicate<object> greaterNull = obj => obj is ulong ? ((ulong)obj > 0) : (obj is double ? ((double)obj > 0) : (obj is float ? ((float)obj > 0) : (obj is long ? ((long)obj > 0) : false)));
 			Predicate<object> zeroOrOne = obj => obj is ulong ? ((ulong)obj == 0 || (ulong)obj == 1) : (obj is double ? ((double)obj == 0 || (double)obj == 1) : (obj is float ? ((float)obj == 0 || (float)obj == 1) : (obj is long ? ((long)obj == 0 || (long)obj == 1) : false)));
@@ -435,14 +432,14 @@ namespace CSEBML.DocTypes.Matroska {
 			yield return new MatroskaDocMetaElement(0x00004487, "123     ", null, null, new int[] { SimpleTag.Id }, "The value of the Tag.");
 			yield return new MatroskaDocMetaElement(0x00004485, "123     ", null, null, new int[] { SimpleTag.Id }, "The values of the Tag if it is binary. Note that this cannot be used in the same SimpleTag as TagString.");
 		}
+
+
+		public static void RegisterErrorHandler(EBMLReader reader) { reader.DataError += (s, e) => OnDataError((EBMLReader)s); }
+		private static void OnDataError(EBMLReader reader) {
+			var dataSrc = reader.BaseStream;
+		}
+
 	}
 
 	public enum MatroskaVersion { Unknown = 0, V1 = 1, V2 = 2, V3 = 4, WebM = 1024 }
-
-
-
-
-
-
-
 }
