@@ -26,11 +26,17 @@ namespace CSEBML {
 		public EBMLDocType DocType { get { return docType; } }
 
 		public Object RetrieveValue(ElementInfo elem) {
-			if(elem != null && elem.DataLength.HasValue && elem.DataPos == dataSrc.Position) {
-				Int64 offset;
-				Byte[] valueData = dataSrc.GetData(elem.DataLength.Value, out offset);
-				return docType.RetrieveValue(elem.DocElement, valueData, offset, elem.DataLength.Value);
-			} else throw new InvalidOperationException("Cannot read value: Invalid State");
+			if(elem != null) throw new ArgumentNullException("elem");
+			if(!elem.DataLength.HasValue) throw new InvalidOperationException("Cannot read value: Invalid State");
+
+			var curPos = dataSrc.Position;
+			if(elem.DataPos != curPos) dataSrc.Position = elem.DataPos;
+
+			Int64 offset;
+			Byte[] valueData = dataSrc.GetData(elem.DataLength.Value, out offset);
+
+			if(dataSrc.Position != curPos) dataSrc.Position = curPos;
+			return docType.RetrieveValue(elem.DocElement, valueData, offset, elem.DataLength.Value);
 		}
 
 		public void Reset() { dataSrc.Position = nextElementPos = lastElementPos = 0; }
