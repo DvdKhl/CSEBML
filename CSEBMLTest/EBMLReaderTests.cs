@@ -1,11 +1,12 @@
 ﻿//Mod. BSD License (See LICENSE file) DvdKhl (DvdKhl@web.de)
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-using CSEBML.DataSource;
-using CSEBML.DocTypes.Matroska;
+
 using CSEBML;
+using CSEBML.DataSource;
 using CSEBML.DocTypes;
+using CSEBML.DocTypes.Matroska;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
 using System.Text;
 
 namespace CSEBMLTest {
@@ -24,8 +25,8 @@ namespace CSEBMLTest {
 			foreach(var filePath in Directory.EnumerateFiles(matroskaTestSuitePath, "*.mkv")) {
 				try {
 					ParseMatroskaTestSuite_ParseFile(filePath);
-					result.AppendLine( filePath + ": Passed");
-				} catch(Exception) {
+					result.AppendLine(filePath + ": Passed");
+				} catch(Exception ex) {
 					result.AppendLine(filePath + ": Failed");
 					allPassed = false;
 				}
@@ -43,10 +44,21 @@ namespace CSEBMLTest {
 			}
 
 			var ebmlSrc = new EBMLStreamDataSource(src);
-			var ebmlDoc = new MatroskaDocType(CSEBML.DocTypes.Matroska.MatroskaVersion.V3);
-			var ebmlReader = new EBMLReader(ebmlSrc, new EBMLDocType());
+			var matroskaDoc = new MatroskaDocType(CSEBML.DocTypes.Matroska.MatroskaVersion.V3);
+			var ebmlReader = new EBMLReader(ebmlSrc, matroskaDoc);
 
-			Recurse(ebmlReader, true);
+
+			Action<bool> recurse = readValues => {
+				try {
+					Recurse(ebmlReader, readValues);
+				} catch(Exception ex) {
+					ex.Data.Add("ReadValues", readValues);
+					throw;
+				}
+			};
+
+			recurse(true);
+			recurse(false);
 		}
 
 
@@ -63,12 +75,12 @@ namespace CSEBMLTest {
 
 		private static void Recurse(EBMLReader reader, bool readValues) {
 			ElementInfo elemInfo;
-			while((elemInfo = reader.Next())!=null) {
+			while((elemInfo = reader.Next()) != null) {
 				if(elemInfo.DocElement.Type == EBMLElementType.Master) {
 					using(reader.EnterElement(elemInfo)) {
 						Recurse(reader, readValues);
 					}
-				} else {
+				} else if(readValues) {
 					var obj = reader.RetrieveValue(elemInfo);
 				}
 			}

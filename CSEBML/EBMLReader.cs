@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using CSEBML.DocTypes;
 using CSEBML.DataSource;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 
 namespace CSEBML {
 	public class EBMLReader {
@@ -26,16 +27,13 @@ namespace CSEBML {
 		public EBMLDocType DocType { get { return docType; } }
 
 		public Object RetrieveValue(ElementInfo elem) {
-			if(elem != null) throw new ArgumentNullException("elem");
-			if(!elem.DataLength.HasValue) throw new InvalidOperationException("Cannot read value: Invalid State");
-
-			var curPos = dataSrc.Position;
-			if(elem.DataPos != curPos) dataSrc.Position = elem.DataPos;
+			if(elem == null) throw new ArgumentNullException("elem");
+			if(!elem.DataLength.HasValue) throw new InvalidOperationException("Cannot retrieve value: Length unknown");
+			if(dataSrc.Position != elem.DataPos) throw new InvalidOperationException("Cannot retrieve value: Current position doesn't match element data position");
 
 			Int64 offset;
 			Byte[] valueData = dataSrc.GetData(elem.DataLength.Value, out offset);
 
-			if(dataSrc.Position != curPos) dataSrc.Position = curPos;
 			return docType.RetrieveValue(elem.DocElement, valueData, offset, elem.DataLength.Value);
 		}
 
@@ -48,10 +46,9 @@ namespace CSEBML {
 			return Next();
 		}
 
-
 		public ElementInfo Next() {
+			if(dataSrc.Position != nextElementPos && nextElementPos != ~VIntConsts.UNKNOWN_LENGTH) dataSrc.Position = nextElementPos;
 			if(nextElementPos == lastElementPos || nextElementPos == ~VIntConsts.UNKNOWN_LENGTH || dataSrc.EOF) return null;
-			if(dataSrc.Position != nextElementPos) dataSrc.Position = nextElementPos;
 
 			Int32 docElementId = dataSrc.ReadIdentifier();
 			Int64 vintPos = dataSrc.Position;
@@ -71,6 +68,8 @@ namespace CSEBML {
 
 			nextElementPos = dataLength < 0 ? ~VIntConsts.UNKNOWN_LENGTH : dataPos + dataLength;
 
+
+			//Debug.WriteLine(elemInfo.ToDetailedString());
 			return elemInfo;
 		}
 

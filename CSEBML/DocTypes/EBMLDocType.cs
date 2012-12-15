@@ -17,7 +17,7 @@ namespace CSEBML.DocTypes {
 		}
 
 		private static IEnumerable<EBMLDocElement> GetDocElements(Type type, Predicate<EBMLDocElement> filter) {
-			var fields = type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField);
+			var fields = type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField | BindingFlags.FlattenHierarchy);
 			foreach(var field in fields) {
 				var obj = field.GetValue(null);
 				if(obj is EBMLDocElement && (filter == null || filter((EBMLDocElement)obj))) yield return (EBMLDocElement)obj;
