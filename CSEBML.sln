@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSEBML", "CSEBML\CSEBML.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSEBMLTest", "CSEBMLTest\CSEBMLTest.csproj", "{35594D6B-0EFF-4F9D-8511-4195063C013B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSEBMLEditor", "CSEBMLEditor\CSEBMLEditor.csproj", "{3081832C-CD9E-40B9-9B9B-B82B9D9E9A4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,12 @@ Global
 		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{35594D6B-0EFF-4F9D-8511-4195063C013B}.Release|x86.ActiveCfg = Release|Any CPU
+		{3081832C-CD9E-40B9-9B9B-B82B9D9E9A4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3081832C-CD9E-40B9-9B9B-B82B9D9E9A4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3081832C-CD9E-40B9-9B9B-B82B9D9E9A4A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3081832C-CD9E-40B9-9B9B-B82B9D9E9A4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3081832C-CD9E-40B9-9B9B-B82B9D9E9A4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3081832C-CD9E-40B9-9B9B-B82B9D9E9A4A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
