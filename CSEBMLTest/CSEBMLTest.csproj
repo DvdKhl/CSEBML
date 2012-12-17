@@ -53,6 +53,7 @@
     <Compile Include="EBMLWriterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EBMLReaderTests.cs" />
+    <Compile Include="BytePatternsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSEBML\CSEBML.csproj">

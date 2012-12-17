@@ -38,6 +38,7 @@ namespace CSEBMLTest {
 			Stream src;
 			try {
 				src = File.OpenRead(filePath);
+				//src = File.OpenRead(@"C:\Users\Arokh\Projects\Visual Studio 2012\Projects\CSEBML\CSEBMLTest\bin\Release\TestFiles\MatroskaTestSuite\test7.mkv");
 			} catch(Exception) {
 				Assert.Inconclusive("Couldn't open Matroska Test File ({0})", filePath);
 				return;
@@ -50,6 +51,7 @@ namespace CSEBMLTest {
 
 			Action<bool> recurse = readValues => {
 				try {
+					ebmlReader.Reset();
 					Recurse(ebmlReader, readValues);
 				} catch(Exception ex) {
 					ex.Data.Add("ReadValues", readValues);
@@ -63,7 +65,7 @@ namespace CSEBMLTest {
 
 
 		[TestMethod]
-		public void GetBaseStream() {
+		public void BaseStream_Equals() {
 			var dataSrc = new EBMLBlockDataSource(new byte[][] { new byte[0] }, 0);
 			var docType = new EBMLDocType();
 			var reader = new EBMLReader(dataSrc, docType);
@@ -71,6 +73,82 @@ namespace CSEBMLTest {
 			Assert.AreEqual(dataSrc, reader.BaseStream);
 		}
 
+		[TestMethod]
+		public void DocType_Equals() {
+			var dataSrc = new EBMLBlockDataSource(new byte[][] { new byte[0] }, 0);
+			var docType = new EBMLDocType();
+			var reader = new EBMLReader(dataSrc, docType);
+
+			Assert.AreEqual(docType, reader.DocType);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void RetrieveValue_NullArgument() {
+			var dataSrc = new EBMLBlockDataSource(new byte[][] { new byte[0] }, 0);
+			var docType = new EBMLDocType();
+			var reader = new EBMLReader(dataSrc, docType);
+			reader.RetrieveValue(null);
+		}
+
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void RetrieveValue_UnknownLength() {
+			var dataSrc = new EBMLBlockDataSource(new byte[][] { new byte[0] }, 0);
+			var docType = new EBMLDocType();
+			var reader = new EBMLReader(dataSrc, docType);
+			reader.RetrieveValue(new ElementInfo(EBMLDocElement.Unknown, 1, 1, 0, null));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void RetrieveValue_WrongPosition() {
+			var dataSrc = new EBMLBlockDataSource(new byte[][] { new byte[0] }, 0);
+			var docType = new EBMLDocType();
+			var reader = new EBMLReader(dataSrc, docType);
+			reader.RetrieveValue(new ElementInfo(EBMLDocElement.Unknown, 1, 2, 3, 1));
+		}
+
+		[TestMethod]
+		public void RetrieveValue_ZeroLength() {
+			var dataSrc = new EBMLBlockDataSource(new byte[][] { new byte[0] }, 0);
+			var docType = new EBMLDocType();
+			var reader = new EBMLReader(dataSrc, docType);
+
+			reader.RetrieveValue(new ElementInfo(EBMLDocElement.Unknown, 0, 0, 0, 0));
+			reader.RetrieveValue(new ElementInfo(EBMLDocElement.Unknown, 1, 1, 1, 0));
+		}
+
+		[TestMethod]
+		public void Reset() {
+			var dataSrc = new EBMLFixedByteArrayDataSource(new byte[] { 0x1A, 0x45, 0xDF, 0xA3, 0x80 });
+			var docType = new EBMLDocType();
+			var reader = new EBMLReader(dataSrc, docType);
+
+			var elemInfo = reader.Next();
+			using(reader.EnterElement(elemInfo)) {
+				elemInfo = reader.Next();
+			}
+
+			reader.Reset();
+			Assert.IsTrue(reader.BaseStream.Position == 0, "Bastream was not reset");
+		}
+
+
+		[TestMethod]
+		public void JumpToElementAt() {
+			var dataSrc = new EBMLFixedByteArrayDataSource(new byte[] { 0x1A, 0x45, 0xDF, 0xA3, 0x80 });
+			var docType = new EBMLDocType();
+			var reader = new EBMLReader(dataSrc, docType);
+
+			var elemInfo = reader.Next();
+			using(reader.EnterElement(elemInfo)) {
+				reader.Next();
+			}
+
+			Assert.IsTrue(reader.JumpToElementAt(0).IdPos == elemInfo.IdPos, "Bastream was not reset");
+		}
 
 
 		private static void Recurse(EBMLReader reader, bool readValues) {

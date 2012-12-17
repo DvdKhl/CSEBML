@@ -14,6 +14,21 @@ namespace CSEBML.DocTypes.Matroska {
 
 		public int MaxDocTypeReadVersion { get { return 3; } }
 
+
+		public override byte[][] CreateSyncPoints() {
+			return new byte[][]{
+					new byte[]{ 0x18, 0x53, 0x80, 0x67 },
+					new byte[]{ 0x11, 0x4D, 0x9B, 0x74 },
+					new byte[]{ 0x15, 0x49, 0xA9, 0x66 },
+					new byte[]{ 0x1F, 0x43, 0xB6, 0x75 },
+					new byte[]{ 0x16, 0x54, 0xAE, 0x6B },
+					new byte[]{ 0x1C, 0x53, 0xBB, 0x6B },
+					new byte[]{ 0x19, 0x41, 0xA4, 0x69 },
+					new byte[]{ 0x10, 0x43, 0xA7, 0x70 },
+					new byte[]{ 0x12, 0x54, 0xC3, 0x67 }
+				};
+		}
+
 		protected override object RetrieveByExtension(EBMLDocElement docElem, byte[] data, long offset, long length) {
 			if(docElem.Id == (int)Block.Id || docElem.Id == (int)SimpleBlock.Id) {
 				return new MatroskaBlock(data, offset, (int)length);
@@ -431,12 +446,6 @@ namespace CSEBML.DocTypes.Matroska {
 			yield return new MatroskaDocMetaElement(0x00004484, "123 Ma  ", 1UL, zeroOrOne, new int[] { SimpleTag.Id }, "Indication to know if this is the default/original language to use for the given tag. (1 bit)");
 			yield return new MatroskaDocMetaElement(0x00004487, "123     ", null, null, new int[] { SimpleTag.Id }, "The value of the Tag.");
 			yield return new MatroskaDocMetaElement(0x00004485, "123     ", null, null, new int[] { SimpleTag.Id }, "The values of the Tag if it is binary. Note that this cannot be used in the same SimpleTag as TagString.");
-		}
-
-
-		public static void RegisterErrorHandler(EBMLReader reader) { reader.DataError += (s, e) => OnDataError((EBMLReader)s); }
-		private static void OnDataError(EBMLReader reader) {
-			var dataSrc = reader.BaseStream;
 		}
 
 	}

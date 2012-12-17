@@ -29,7 +29,6 @@ namespace CSEBML.DataSource {
 		}
 
 
-
 		public Int32 ReadIdentifier() {
 			int bytesToRead = 0;
 			Byte mask = 1 << 7;
@@ -71,6 +70,19 @@ namespace CSEBML.DataSource {
 			return value == VIntConsts.RESERVEDVINTS[bytesToRead] ? ~VIntConsts.UNKNOWN_LENGTH : value;
 		}
 
+
+		public void SyncTo(BytePatterns bytePatterns) {
+			var b = new byte[1024 * 1024];
+			int foundRelativePosition = -1;
+			while(foundRelativePosition == -1 && !EOF) {
+				source.Read(b, 0, b.Length);
+
+				bytePatterns.Match(b, 0, (pattern, i) => { foundRelativePosition = i; return false; });
+			}
+
+			if(foundRelativePosition != -1) source.Position -= b.Length - foundRelativePosition;
+		}
+
 		public bool EOF { get { return Position == Length; } }
 
 		public void WriteIdentifier(Int32 id) {
@@ -98,5 +110,7 @@ namespace CSEBML.DataSource {
 
 		public void Write(byte[] b, int offset, int length) { source.Write(b, offset, length); }
 		public long Write(System.IO.Stream source) { throw new NotImplementedException(); }
+
+
 	}
 }

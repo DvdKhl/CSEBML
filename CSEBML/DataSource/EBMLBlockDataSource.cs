@@ -103,6 +103,15 @@ namespace CSEBML.DataSource {
 			return block;
 		}
 
+		public void SyncTo(BytePatterns bytePatterns) {
+			int foundRelativePosition = -1;
+			while(foundRelativePosition == -1 && !EOF) {
+				bytePatterns.Match(blocks.Current, (int)relativePosition, (pattern, i) => { foundRelativePosition = i; return false; });
+				if(foundRelativePosition == -1) advance();
+			}
+
+			if(foundRelativePosition != -1) relativePosition = foundRelativePosition;
+		}
 
 		public Int32 ReadIdentifier() {
 			int bytesToRead = 0;

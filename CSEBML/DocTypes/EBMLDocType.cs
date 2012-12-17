@@ -24,6 +24,7 @@ namespace CSEBML.DocTypes {
 			}
 		}
 
+		public virtual byte[][] CreateSyncPoints() { return new byte[0][]; }
 
 		public EBMLDocElement RetrieveDocElement(Int32 id) {
 			EBMLDocElement elementType = (docElementMap.TryGetValue(id, out elementType) ? elementType : null);
