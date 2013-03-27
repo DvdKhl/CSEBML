@@ -147,7 +147,7 @@ namespace CSEBMLTest {
 				reader.Next();
 			}
 
-			Assert.IsTrue(reader.JumpToElementAt(0).IdPos == elemInfo.IdPos, "Bastream was not reset");
+			Assert.IsTrue(reader.JumpToElementAt(0).IdPos == elemInfo.IdPos, "Basestream was not reset");
 		}
 
 
