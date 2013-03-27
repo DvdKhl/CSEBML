@@ -63,9 +63,15 @@ namespace CSEBML.DataSource {
 		public Byte[] GetData(Int64 neededBytes, out Int64 offset) {
 			Byte[] block = blocks.Current;
 
-			if(BlockLength() - relativePosition > neededBytes) {
+			var blockLength = BlockLength();
+			if(blockLength - relativePosition > neededBytes) {
 				offset = relativePosition;
 				relativePosition += neededBytes;
+
+			} else if(blockLength - relativePosition == neededBytes) {
+				offset = relativePosition;
+				relativePosition += neededBytes;
+				advance();
 
 			} else {
 				if(absolutePosition + relativePosition + neededBytes > length) { //Requesting more than available
@@ -77,12 +83,12 @@ namespace CSEBML.DataSource {
 				Int32 bytesCopied = 0;
 				Byte[] b = new Byte[neededBytes];
 
-				bytesCopied = BlockLength() - (Int32)relativePosition;
+				bytesCopied = blockLength - (Int32)relativePosition;
 				Buffer.BlockCopy(block, (Int32)relativePosition, b, 0, bytesCopied);
 
 				advance();
 				block = blocks.Current;
-				var blockLength = BlockLength();
+				blockLength = BlockLength();
 				while(bytesCopied + blockLength <= neededBytes) {
 					Buffer.BlockCopy(block, 0, b, bytesCopied, blockLength);
 					bytesCopied += blockLength;
