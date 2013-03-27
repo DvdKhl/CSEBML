@@ -54,9 +54,9 @@ namespace CSEBML {
 			return Next();
 		}
 
+
 		public ElementInfo Next() {
 			if((lastElementPos != ~VIntConsts.UNKNOWN_LENGTH && nextElementPos >= lastElementPos) || nextElementPos == ~VIntConsts.UNKNOWN_LENGTH || dataSrc.EOF) return null;
-			//if(nextElementPos == lastElementPos || nextElementPos == ~VIntConsts.UNKNOWN_LENGTH || dataSrc.EOF) return null;
 			if(dataSrc.Position != nextElementPos) dataSrc.Position = nextElementPos;
 
 			ElementInfo elemInfo;
@@ -95,7 +95,6 @@ namespace CSEBML {
 			disposable.Disposed += (s, e) => {
 				var d = (PreviousState)s;
 				if(nextElementPos < d.LastElementPos) nextElementPos = d.NextElementPos;
-				//nextElementPos = d.NextElementPos;
 				lastElementPos = d.LastElementPos;
 			};
 
