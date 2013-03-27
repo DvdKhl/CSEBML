@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="DataSource\BytePatterns.cs" />
     <Compile Include="DataSource\EBMLFixedByteArrayDataSource.cs" />
+    <Compile Include="DataSource\EBMLRandomDataSource.cs" />
     <Compile Include="DataSource\VIntConsts.cs" />
     <Compile Include="DocTypes\EBMLDocType.cs" />
     <Compile Include="DocTypes\EBMLDocElement.cs" />
