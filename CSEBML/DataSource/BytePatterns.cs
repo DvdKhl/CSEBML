@@ -37,7 +37,7 @@ namespace CSEBML.DataSource {
 						nodes.Add(curNode.Children[value]);
 					}
 
-	
+
 					curNode = curNode.Children[value];
 				}
 				patternLookup.Add(curNode, pattern);
@@ -84,6 +84,8 @@ namespace CSEBML.DataSource {
 
 			this.current = this.root = root;
 		}
+
+		public void Reset() { current = root; }
 
 		public void Match(byte[] data, int offset, Func<byte[], int, bool> match) {
 			for(int i = offset;i < data.Length;i++) {

@@ -30,7 +30,7 @@ namespace CSEBML.DataSource {
 
 		public int BlockSize { get; private set; }
 		public int ReadBlocks { get; private set; }
-		private int BlockLength() { return (int)Math.Min(blocks.Current.Length, length - ReadBlocks * BlockSize); }
+		private int BlockLength() { return (int)Math.Min(blocks.Current.Length, length - absolutePosition); }
 
 		public bool CanSeek { get { return false; } }
 		public long Length { get { return length; } }
@@ -109,14 +109,19 @@ namespace CSEBML.DataSource {
 			return block;
 		}
 
-		public void SyncTo(BytePatterns bytePatterns) {
+		public void SyncTo(BytePatterns bytePatterns, long seekUntil) {
+			bytePatterns.Reset();
 			int foundRelativePosition = -1;
-			while(foundRelativePosition == -1 && !EOF) {
+			while(foundRelativePosition < 0 && !EOF) {
 				bytePatterns.Match(blocks.Current, (int)relativePosition, (pattern, i) => { foundRelativePosition = i; return false; });
-				if(foundRelativePosition == -1) advance();
+				if(foundRelativePosition < 0) {
+					bytePatterns.Reset();
+					if(seekUntil == -1 || absolutePosition + BlockSize <= seekUntil) advance(); else break;
+				}
 			}
 
-			if(foundRelativePosition != -1) relativePosition = foundRelativePosition;
+			if(seekUntil != -1 && absolutePosition + foundRelativePosition > seekUntil) foundRelativePosition = (int)(seekUntil - absolutePosition);
+			if(foundRelativePosition >= 0) relativePosition = foundRelativePosition;
 		}
 
 		public Int32 ReadIdentifier() {
@@ -125,7 +130,7 @@ namespace CSEBML.DataSource {
 			Byte[] block = blocks.Current;
 			Byte encodedSize = block[relativePosition++];
 
-			while((mask & encodedSize) == 0 && bytesToRead++ < 4) mask = (Byte)(mask >> 1);
+			while((mask & encodedSize) == 0 && ++bytesToRead < 4) mask = (Byte)(mask >> 1);
 			if(bytesToRead == 4) return ~VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int32
 
 			Int32 value = 0;
@@ -151,7 +156,7 @@ namespace CSEBML.DataSource {
 			Byte[] block = blocks.Current;
 			Byte encodedSize = block[relativePosition++];
 
-			while((mask & encodedSize) == 0 && bytesToRead++ < 8) { mask = (Byte)(mask >> 1); }
+			while((mask & encodedSize) == 0 && ++bytesToRead < 8) { mask = (Byte)(mask >> 1); }
 			if(bytesToRead == 8) return ~VIntConsts.INVALID_LENGTH_DESCRIPTOR_ERROR; //Identifiers are Int64
 
 			Int64 value = 0;

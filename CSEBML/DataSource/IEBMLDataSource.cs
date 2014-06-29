@@ -16,7 +16,7 @@ namespace CSEBML.DataSource {
         Int32 ReadIdentifier();
         Int64 ReadVInt();
 
-		void SyncTo(BytePatterns bytePatterns);
+		void SyncTo(BytePatterns bytePatterns, long seekUntil);
 
 		void WriteIdentifier(Int32 id);
 		void WriteVInt(Int64 value, Int32 vIntLength = 1);

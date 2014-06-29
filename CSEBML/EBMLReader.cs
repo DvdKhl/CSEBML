@@ -64,21 +64,21 @@ namespace CSEBML {
 			var vintPos = dataSrc.Position;
 			var dataLength = dataSrc.ReadVInt();
 			var dataPos = dataSrc.Position;
-			if(
-				(docElementId < 0 && (~docElementId & VIntConsts.ERROR) != 0) ||
-				(dataLength < 0 && (~dataLength & VIntConsts.ERROR) != 0) ||
-				(lastElementPos != ~VIntConsts.UNKNOWN_LENGTH && dataPos + dataLength > lastElementPos)
-			) {
+
+			var isDocElementInvalid = docElementId < 0 && (~docElementId & VIntConsts.ERROR) != 0;
+			var isDataLengthInvalid = dataLength < 0 && (~dataLength & VIntConsts.ERROR) != 0;
+			var isOutOfBounds = lastElementPos != ~VIntConsts.UNKNOWN_LENGTH && dataPos + dataLength > lastElementPos;
+			if(isDocElementInvalid || isDataLengthInvalid || isOutOfBounds) {
 				elemInfo = new ElementInfo(EBMLDocElement.Unknown, nextElementPos, vintPos, dataPos, 0);
 
-				dataSrc.SyncTo(bytePatterns);
+				dataSrc.SyncTo(bytePatterns, lastElementPos);
 				nextElementPos = dataSrc.Position;
 
 				return elemInfo;
 			}
 
 			var docElem = docType.RetrieveDocElement(docElementId);
-			elemInfo = new ElementInfo(docElem, nextElementPos, vintPos, dataPos, dataLength < 0 ? (Int64?)null : dataLength);
+			elemInfo = new ElementInfo(docElem, nextElementPos, vintPos, dataPos, dataLength < 0 ? default(Int64?) : dataLength);
 
 			nextElementPos = dataLength < 0 ? ~VIntConsts.UNKNOWN_LENGTH : dataPos + dataLength;
 

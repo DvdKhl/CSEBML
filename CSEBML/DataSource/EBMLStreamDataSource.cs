@@ -71,16 +71,19 @@ namespace CSEBML.DataSource {
 		}
 
 
-		public void SyncTo(BytePatterns bytePatterns) {
+		public void SyncTo(BytePatterns bytePatterns, long seekUntil) {
+			bytePatterns.Reset();
+
 			var b = new byte[1024 * 1024];
-			int foundRelativePosition = -1;
-			while(foundRelativePosition == -1 && !EOF) {
-				source.Read(b, 0, b.Length);
+			int foundRelativePosition = int.MinValue;
+			while(foundRelativePosition == int.MinValue && !EOF) {
+				if(seekUntil != -1 || Position < seekUntil) source.Read(b, 0, b.Length); else break;
 
 				bytePatterns.Match(b, 0, (pattern, i) => { foundRelativePosition = i; return false; });
 			}
 
-			if(foundRelativePosition != -1) source.Position -= b.Length - foundRelativePosition;
+			if(seekUntil != -1 && Position - b.Length + foundRelativePosition > seekUntil) foundRelativePosition = b.Length - (int)(Position - seekUntil);
+			if(foundRelativePosition != int.MinValue) source.Position -= b.Length - foundRelativePosition;
 		}
 
 		public bool EOF { get { return Position == Length; } }

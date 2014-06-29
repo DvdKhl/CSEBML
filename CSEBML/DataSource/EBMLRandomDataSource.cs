@@ -56,7 +56,7 @@ namespace CSEBML.DataSource {
 			return length != ~VIntConsts.UNKNOWN_LENGTH ? rnd.Next(0, Math.Min(maxValueLength, (int)(length - position))) : rnd.Next(0, maxValueLength);
 		}
 
-		public void SyncTo(BytePatterns bytePatterns) { throw new NotSupportedException(); }
+		public void SyncTo(BytePatterns bytePatterns, long seekUntil) { throw new NotSupportedException(); }
 
 
 		public void WriteIdentifier(int id) { throw new NotSupportedException(); }

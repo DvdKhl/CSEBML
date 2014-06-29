@@ -208,6 +208,7 @@ namespace CSEBML.DocTypes.Matroska {
 		public static readonly EBMLDocElement EditionFlagOrdered = new EBMLDocElement(0x000045DD, EBMLElementType.UInteger, "EditionFlagOrdered");
 		public static readonly EBMLDocElement ChapterAtom = new EBMLDocElement(0x000000B6, EBMLElementType.Master, "ChapterAtom");
 		public static readonly EBMLDocElement ChapterUID = new EBMLDocElement(0x000073C4, EBMLElementType.UInteger, "ChapterUID");
+		public static readonly EBMLDocElement ChapterStringUID = new EBMLDocElement(0x00005654, EBMLElementType.UTF8, "ChapterStringUID");
 		public static readonly EBMLDocElement ChapterTimeStart = new EBMLDocElement(0x00000091, EBMLElementType.UInteger, "ChapterTimeStart");
 		public static readonly EBMLDocElement ChapterTimeEnd = new EBMLDocElement(0x00000092, EBMLElementType.UInteger, "ChapterTimeEnd");
 		public static readonly EBMLDocElement ChapterFlagHidden = new EBMLDocElement(0x00000098, EBMLElementType.UInteger, "ChapterFlagHidden");

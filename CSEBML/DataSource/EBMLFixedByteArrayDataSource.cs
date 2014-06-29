@@ -21,11 +21,12 @@ namespace CSEBML.DataSource {
 			return data;
 		}
 
-		public void SyncTo(BytePatterns bytePatterns) {
-			int foundRelativePosition = -1;
-			bytePatterns.Match(data, (int)Position, (pattern, i) => { foundRelativePosition = i; return false; });
+		public void SyncTo(BytePatterns bytePatterns, long seekUntil) {
+			long foundPosition = -1;
+			bytePatterns.Match(data, (int)Position, (pattern, i) => { foundPosition = i; return false; });
 
-			if(foundRelativePosition != -1) Position = foundRelativePosition;
+			if(foundPosition > seekUntil) foundPosition = seekUntil;
+			if(foundPosition != -1) Position = foundPosition;
 		}
 
 		public Int32 ReadIdentifier() {
